@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Розрахунок вартості квартири</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0e1a29; --ink-2:#3c4f63; --paper:#e9ecef; --surface:#fff;
+  --line:#ccd5dd; --line-2:#95a5b5; --accent:#0c6f7d; --accent-bg:#e3f0f1;
+  --gold:#8c6a1f; --gold-bg:#fdf6e4; --warn:#a4382a; --r:3px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font:15px/1.45 "IBM Plex Sans",system-ui,sans-serif;-webkit-text-size-adjust:100%}
+.num{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+.eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-2)}
+header.top{background:var(--ink);color:#fff;border-bottom:1px solid var(--line-2)}
+.top-in{max-width:1140px;margin:0 auto;padding:18px 16px 0;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between}
+.brand h1{font-family:"IBM Plex Sans Condensed",sans-serif;font-weight:700;font-size:23px;letter-spacing:.02em;text-transform:uppercase;margin:0 0 3px}
+.brand p{margin:0 0 16px;font:12px "IBM Plex Mono",monospace;color:#9db2c6}
+.tabs{display:flex;gap:2px;margin-bottom:-1px}
+.tab{appearance:none;border:0;cursor:pointer;padding:11px 18px;color:#9db2c6;background:#1b2c40;border-radius:var(--r) var(--r) 0 0;font:12px "IBM Plex Mono",monospace;letter-spacing:.1em;text-transform:uppercase}
+.tab[aria-selected="true"]{background:var(--paper);color:var(--ink);font-weight:600}
+.tab:focus-visible{outline:2px solid #6fd0dd;outline-offset:-3px}
+.wrap{max-width:1140px;margin:0 auto;padding:0 16px 60px}
+.grid{display:grid;grid-template-columns:1fr;gap:20px;padding-top:22px}
+@media(min-width:920px){.grid{grid-template-columns:1.02fr .98fr;gap:24px;align-items:start}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.step{margin-bottom:16px}
+.step-head{display:flex;align-items:baseline;gap:10px;padding:11px 16px;border-bottom:1px solid var(--line)}
+.step-no{font:600 12px "IBM Plex Mono",monospace;color:var(--accent)}
+.step-title{font-family:"IBM Plex Sans Condensed",sans-serif;font-weight:600;text-transform:uppercase;letter-spacing:.06em;font-size:15px}
+.step-body{padding:15px 16px}
+.row{display:grid;grid-template-columns:1fr;gap:13px}
+@media(min-width:520px){.row.two{grid-template-columns:1fr 1fr}.row.three{grid-template-columns:1fr 1fr 1fr}}
+label.f{display:block}
+label.f>span.eyebrow{display:block;margin-bottom:5px}
+input,select{width:100%;padding:10px 11px;border:1px solid var(--line-2);border-radius:var(--r);background:#fff;color:var(--ink);font:500 15px/1.2 "IBM Plex Mono",monospace}
+select{font-family:"IBM Plex Sans",sans-serif}
+input:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent)}
+input:disabled{background:#f1f4f6;color:#8a99a8}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+.chip{appearance:none;cursor:pointer;border:1px solid var(--line-2);background:#fff;border-radius:20px;padding:5px 12px;font:500 12px "IBM Plex Mono",monospace;color:var(--ink-2)}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.hint{font-size:12px;color:var(--ink-2);margin-top:6px}
+.warn{color:var(--warn);font-size:12.5px;margin-top:8px}
+.inline-check{display:flex;align-items:center;gap:8px;font-size:13.5px;margin-top:10px}
+.inline-check input{width:auto}
+.result{position:sticky;top:14px}
+.res-head{background:var(--ink);color:#fff;padding:13px 16px;border-radius:var(--r) var(--r) 0 0}
+.res-head .eyebrow{color:#8fa8bd}
+.res-obj{font-family:"IBM Plex Sans Condensed",sans-serif;font-size:18px;font-weight:600;margin-top:2px}
+.res-sub{font:12px "IBM Plex Mono",monospace;color:#9db2c6;margin-top:3px}
+table.bd{width:100%;border-collapse:collapse}
+table.bd td{padding:7px 16px;border-bottom:1px solid var(--line);font-size:13.5px}
+table.bd td:last-child{text-align:right;font-family:"IBM Plex Mono",monospace;white-space:nowrap}
+table.bd tr.sum td{background:#f3f7f8;font-weight:600;border-bottom:1px solid var(--line-2)}
+table.bd td.neg{color:var(--warn)}
+table.bd td.sec{padding-top:11px;padding-bottom:3px;border:0}
+.headline{background:var(--accent-bg);border:1px solid #b3d6da;border-radius:var(--r);padding:13px 15px;margin:14px 16px;display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between}
+.headline div{min-width:118px}
+.headline .num{display:block;font-size:23px;font-weight:600;color:var(--accent);margin-top:2px}
+.headline .uah{display:block;font:12px "IBM Plex Mono",monospace;color:var(--ink-2);margin-top:1px}
+.benefit{background:var(--gold-bg);border:1px solid #e2cf9c;border-radius:var(--r);padding:10px 15px;margin:0 16px 14px;display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.benefit .num{color:var(--gold);font-weight:600;font-size:17px}
+.timeline{padding:0 16px 16px}
+.tl-bar{display:flex;height:32px;border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden}
+.tl-first{background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font:600 11px "IBM Plex Mono",monospace;min-width:42px}
+.tl-rest{flex:1;display:flex;align-items:center;justify-content:center;font:500 11px "IBM Plex Mono",monospace;color:var(--accent);background:repeating-linear-gradient(90deg,var(--accent-bg) 0 calc(100%/var(--m) - 1px),var(--line-2) calc(100%/var(--m) - 1px) calc(100%/var(--m)))}
+.tl-legend{display:flex;justify-content:space-between;margin-top:5px;font:11px "IBM Plex Mono",monospace;color:var(--ink-2)}
+.totals{padding:2px 16px 14px}
+.tot-line{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:5px 0;font-size:14px}
+.tot-line.big{border-top:1px solid var(--line);margin-top:8px;padding-top:11px}
+.tot-line.big span:first-child{font-family:"IBM Plex Sans Condensed",sans-serif;text-transform:uppercase;letter-spacing:.05em;font-weight:600;font-size:15px}
+.tot-line.big .num{font-size:25px;font-weight:600}
+.actions{display:flex;gap:8px;flex-wrap:wrap;padding:0 16px 16px}
+.btn{appearance:none;cursor:pointer;border:1px solid var(--ink);background:var(--ink);color:#fff;padding:10px 15px;border-radius:var(--r);font:600 13px "IBM Plex Sans",sans-serif}
+.btn.ghost{background:#fff;color:var(--ink)}
+.btn:hover{opacity:.9}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.set-head{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;padding-top:22px}
+.set-note{background:var(--gold-bg);border:1px solid #e2cf9c;padding:11px 14px;border-radius:var(--r);font-size:13.5px;margin-top:13px}
+.px{margin-top:16px}
+.px-head{display:flex;gap:10px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line);background:#f3f7f8}
+.px-head input{font:600 16px "IBM Plex Sans Condensed",sans-serif;border:0;background:transparent;padding:6px 4px}
+.px-head input:focus{background:#fff;border:1px solid var(--accent)}
+.sub{margin-top:16px}
+.sub h4{font-family:"IBM Plex Sans Condensed",sans-serif;text-transform:uppercase;letter-spacing:.07em;font-size:12.5px;margin:0 0 7px;color:var(--ink-2)}
+table.mini{width:100%;border-collapse:collapse}
+table.mini th{font:500 11px "IBM Plex Mono",monospace;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-2);text-align:left;padding:0 6px 5px 0}
+table.mini td{padding:3px 6px 3px 0}
+table.mini input{padding:7px 8px;font-size:13.5px}
+.x{appearance:none;border:1px solid var(--line-2);background:#fff;color:var(--warn);cursor:pointer;border-radius:var(--r);width:30px;height:30px;font-size:15px;line-height:1}
+.add{appearance:none;border:1px dashed var(--line-2);background:#fff;color:var(--accent);cursor:pointer;border-radius:var(--r);padding:6px 11px;font:600 12px "IBM Plex Mono",monospace;margin-top:5px}
+.banner{background:var(--gold-bg);border:1px solid #e2cf9c;border-radius:var(--r);padding:12px 14px;margin-top:16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;font-size:14px}
+.banner-btns{display:flex;gap:8px}
+.banner .btn{padding:8px 13px;font-size:12.5px}
+.modal{position:fixed;inset:0;background:rgba(14,26,41,.72);z-index:20;display:flex;align-items:center;justify-content:center;padding:14px}
+.modal-in{background:#fff;border-radius:var(--r);max-width:440px;width:100%;max-height:92vh;overflow:auto;padding:14px}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.modal-in img{width:100%;display:block;border:1px solid var(--line);border-radius:var(--r)}
+.modal-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.modal-actions .btn{flex:1;min-width:120px;text-align:center}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;background:var(--ink);color:#fff;padding:11px 18px;border-radius:var(--r);font-size:13.5px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:9}
+.toast.on{opacity:1}
+[hidden]{display:none!important}
+.legal{font-size:11.5px;color:var(--ink-2);padding:0 16px 16px;line-height:1.4}
+#printsheet{display:none}
+@media print{
+  body{background:#fff}
+  header.top,.wrap,.toast{display:none!important}
+  #printsheet{display:block;padding:0;font-size:13px}
+  #printsheet h2{font-family:"IBM Plex Sans Condensed",sans-serif;text-transform:uppercase;font-size:17px;margin:0 0 14px;border-bottom:2px solid #000;padding-bottom:6px}
+  #printsheet table{width:100%;border-collapse:collapse}
+  #printsheet td{padding:5px 0;border-bottom:1px solid #ccc}
+  #printsheet td:last-child{text-align:right;font-family:"IBM Plex Mono",monospace;white-space:nowrap}
+  #printsheet tr.hi td{font-weight:700;font-size:15px;border-bottom:2px solid #000}
+  #printsheet .foot{margin-top:16px;font-size:11px;line-height:1.4}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <h1>Розрахунок вартості квартири</h1>
+      <p>Перший внесок · розтермінування · знижки</p>
+    </div>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tab-calc" aria-selected="true" aria-controls="panel-calc">Калькулятор</button>
+      <button class="tab" role="tab" id="tab-set" aria-selected="false" aria-controls="panel-set">Прайс</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+<div class="banner" id="banner" hidden>
+  <span id="banner-txt"></span>
+  <span class="banner-btns">
+    <button class="btn" id="b-upd">Оновити ціни</button>
+    <button class="btn ghost" id="b-later">Пізніше</button>
+  </span>
+</div>
+<div id="panel-calc" role="tabpanel" aria-labelledby="tab-calc">
+<div class="grid">
+  <div class="col-form">
+
+    <section class="card step">
+      <div class="step-head"><span class="step-no">01</span><span class="step-title">Об'єкт</span></div>
+      <div class="step-body">
+        <label class="f"><span class="eyebrow">Будинок / черга</span><select id="i-prod"></select></label>
+        <p class="hint" id="prod-hint"></p>
+      </div>
+    </section>
+
+    <section class="card step">
+      <div class="step-head"><span class="step-no">02</span><span class="step-title">Квартира</span></div>
+      <div class="step-body">
+        <div class="row two">
+          <label class="f"><span class="eyebrow">Площа, м²</span><input id="i-area" type="number" min="1" step="0.01" value="44.4"></label>
+          <label class="f" id="wrap-rooms"><span class="eyebrow">Кімнатність</span><select id="i-rooms"></select></label>
+        </div>
+        <div class="row two" style="margin-top:13px">
+          <label class="f" id="wrap-floor"><span class="eyebrow">Поверх</span><select id="i-floor"></select></label>
+          <label class="f" id="wrap-view"><span class="eyebrow">Вид</span><select id="i-view"></select></label>
+        </div>
+        <div class="inline-check"><input type="checkbox" id="i-manual"><label for="i-manual">Вписати базову ціну за м² вручну</label></div>
+        <label class="f" style="margin-top:8px"><span class="eyebrow">Базова ціна за м², $</span><input id="i-price" type="number" step="1" disabled></label>
+      </div>
+    </section>
+
+    <section class="card step">
+      <div class="step-head"><span class="step-no">03</span><span class="step-title">Умови оплати</span></div>
+      <div class="step-body">
+        <label class="f"><span class="eyebrow">Термін розтермінування</span>
+          <input id="i-months" type="number" min="0" step="1" value="24">
+          <span class="chips" id="m-chips"></span>
+          <span class="hint" id="m-hint"></span>
+        </label>
+
+        <label class="f" style="margin-top:15px"><span class="eyebrow">Знижка</span><select id="i-disc"></select>
+          <span class="hint" id="d-hint"></span>
+        </label>
+
+        <label class="f" style="margin-top:15px"><span class="eyebrow">Перший внесок, $</span>
+          <input id="i-first" type="number" min="0" step="1">
+          <span class="chips" id="f-chips"></span>
+          <span class="hint" id="f-hint"></span>
+        </label>
+        <p class="warn" id="f-warn" hidden></p>
+      </div>
+    </section>
+
+    <section class="card step">
+      <div class="step-head"><span class="step-no">04</span><span class="step-title">Для пропозиції</span></div>
+      <div class="step-body">
+        <div class="row two">
+          <label class="f"><span class="eyebrow">Ім'я клієнта</span><input id="i-client" type="text" placeholder="—" style="font-family:'IBM Plex Sans',sans-serif"></label>
+          <label class="f"><span class="eyebrow">Курс $ (Укргазбанк)</span><input id="i-rate" type="number" step="0.01" value="45"></label>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="col-result">
+    <section class="card result">
+      <div class="res-head">
+        <div class="eyebrow">Розрахунок</div>
+        <div class="res-obj" id="r-obj">—</div>
+        <div class="res-sub" id="r-sub"></div>
+      </div>
+      <table class="bd" id="r-bd"></table>
+
+      <div class="headline">
+        <div><span class="eyebrow">Перший внесок</span><span class="num" id="r-first">—</span><span class="uah" id="r-first-uah"></span></div>
+        <div><span class="eyebrow">Щомісяця</span><span class="num" id="r-month">—</span><span class="uah" id="r-month-uah"></span></div>
+      </div>
+
+      <div class="benefit" id="r-benefit" hidden><span>Вигода клієнта</span><span class="num" id="r-ben">—</span></div>
+
+      <div class="timeline" id="r-tl" hidden>
+        <div class="eyebrow" style="margin-bottom:5px">Графік платежів</div>
+        <div class="tl-bar"><div class="tl-first" id="tl-a"></div><div class="tl-rest" id="tl-b"></div></div>
+        <div class="tl-legend"><span>Договір</span><span id="tl-r"></span></div>
+      </div>
+
+      <div class="totals">
+        <div class="tot-line"><span>Сума на розтермінування</span><span class="num" id="r-rest">—</span></div>
+        <div class="tot-line big"><span>Вартість квартири</span><span class="num" id="r-total">—</span></div>
+        <div class="tot-line" style="padding-top:2px"><span class="eyebrow">у гривні по курсу</span><span class="num eyebrow" id="r-total-uah"></span></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="b-img">Картинка в месенджер</button>
+        <button class="btn ghost" id="b-copy">Скопіювати текстом</button>
+        <button class="btn ghost" id="b-print">Друк / PDF</button>
+      </div>
+      <p class="legal">Валютний договір, оплата національною валютою по курсу продажу $ в АБ УКРГАЗБАНК на день оплати чергового платежу.</p>
+    </section>
+  </div>
+</div>
+</div>
+
+<div id="panel-set" role="tabpanel" aria-labelledby="tab-set" hidden>
+  <div class="set-head">
+    <div><div class="eyebrow">Довідник</div>
+      <div style="font-family:'IBM Plex Sans Condensed';font-size:19px;font-weight:600;text-transform:uppercase">Ціни та умови</div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn ghost" id="b-exp">Зберегти копію</button>
+      <button class="btn ghost" id="b-imp">Завантажити копію</button>
+      <button class="btn ghost" id="b-reset">Скинути до прайсу</button>
+    </div>
+  </div>
+  <div class="set-note">Дані з прайсу від 01.07.2026. Коли вийде новий прайс — просто змініть цифри тут, вони збережуться у цьому браузері. Ціни за м² у доларах, надбавка за розтермінування — теж за м².</div>
+
+  <div class="card px">
+    <div class="px-head"><span style="font:600 16px 'IBM Plex Sans Condensed'">ЗНИЖКИ</span></div>
+    <div class="step-body">
+      <table class="mini"><thead><tr><th>Назва</th><th>%</th><th>Діє й на ціну з розтермінуванням</th><th></th></tr></thead><tbody id="d-rows"></tbody></table>
+      <button class="add" id="d-add">+ Знижка</button>
+    </div>
+  </div>
+
+  <div id="px-list"></div>
+  <input type="file" id="fileinp" accept="application/json" hidden>
+</div>
+</div>
+
+<div id="printsheet"></div>
+
+<div class="modal" id="imgmodal" hidden>
+  <div class="modal-in">
+    <div class="modal-head"><span class="eyebrow">Картинка для месенджера</span>
+      <button class="x" id="im-close" aria-label="Закрити">×</button></div>
+    <img id="im-preview" alt="Розрахунок вартості">
+    <p class="hint" id="im-hint">На телефоні можна просто утримувати картинку і зберегти або переслати.</p>
+    <div class="modal-actions">
+      <button class="btn" id="im-share" hidden>Поділитися</button>
+      <button class="btn ghost" id="im-copy">Копіювати</button>
+      <button class="btn ghost" id="im-save">Зберегти файл</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+const KEY="realty-calc-v2";
+const store={
+  async get(){
+    try{ if(window.storage&&window.storage.get){const r=await window.storage.get(KEY);return r&&r.value?JSON.parse(r.value):null;} }catch(e){}
+    try{ const s=localStorage.getItem(KEY); return s?JSON.parse(s):null; }catch(e){ return null; }
+  },
+  async set(o){ const s=JSON.stringify(o);
+    try{ if(window.storage&&window.storage.set){await window.storage.set(KEY,s);return;} }catch(e){}
+    try{ localStorage.setItem(KEY,s); }catch(e){}
+  }
+};
+
+/* ---------- ДАНІ З ПРАЙСУ 01.07.2026 ---------- */
+function defaults(){return{
+ version:"2026-07-01",
+ discounts:[
+  {name:"Без знижки",pct:0,onInst:false},
+  {name:"−5% для всіх (URBN, Porto Franko, HPDL)",pct:5,onInst:false},
+  {name:"−5% студії URBN 3-7 (внесок від 30%, 24 міс)",pct:5,onInst:false}
+ ],
+ products:[
+  {id:"urbn12",name:"URBN 1-2",note:"Здача QIV 2026. Розтермінування тільки до кінця 2026 — 4 місяці.",
+   mode:"rooms",minPct:20,terms:[{max:4,add:50}],
+   rooms:[{name:"1К",price:999},{name:"2К",price:979},{name:"3К",price:949}]},
+  {id:"urbn37",name:"URBN 3-7",note:"Здача QI 2028. Внесок від 20%.",
+   mode:"rooms",minPct:20,terms:[{max:12,add:30},{max:24,add:60},{max:28,add:75}],
+   rooms:[{name:"Студія",price:935},{name:"1К",price:979},{name:"2К (до 69,9 м²)",price:949},{name:"3К (від 71 м²)",price:939}]},
+  {id:"pf15",name:"PORTO FRANKO 1-5",note:"Здача QIV 2027. Розтермінування 4 місяці. Машиномісце $900 при 100% оплаті.",
+   mode:"rooms",minPct:20,terms:[{max:4,add:50}],
+   rooms:[{name:"1К",price:1175},{name:"2К (до 80 м²)",price:1125},{name:"3К (від 80 м²)",price:1025}]},
+  {id:"pf611",name:"PORTO FRANKO 6-11",note:"Здача QIV 2027. Внесок від 20%.",
+   mode:"rooms",minPct:20,terms:[{max:12,add:30},{max:24,add:60},{max:28,add:75}],
+   rooms:[{name:"1К",price:999},{name:"2К",price:969},{name:"3К",price:949}]},
+  {id:"hpdl12",name:"HYDROPARK DELUXE 1-2",note:"Здача QIV 2027. Внесок від 20%.",
+   mode:"floors",minPct:20,terms:[{max:12,add:50},{max:24,add:100},{max:28,add:150}],
+   views:["Видова","Невидова"],
+   floors:[{label:"2 поверх",prices:[1330,1330]},{label:"3-7 поверх",prices:[1410,1410]},
+           {label:"8-10 поверх",prices:[1490,1410]},{label:"11-13 поверх",prices:[1650,1410]}]},
+  {id:"hpdl3",name:"HYDROPARK DELUXE 3",note:"Здача QIV 2026. Розтермінування до кінця 2026 — 4 місяці.",
+   mode:"floors",minPct:20,terms:[{max:4,add:50}],views:["Видова"],
+   floors:[{label:"2 поверх",prices:[1330]},{label:"3-7 поверх",prices:[1410]},{label:"8-10 поверх",prices:[1550]},
+           {label:"11-13 поверх",prices:[1650]},{label:"14-15 поверх",prices:[1750]},{label:"Пентхаус",prices:[3500]}]},
+  {id:"hpdl4",name:"HYDROPARK DELUXE 4",note:"Здача QIV 2026. Розтермінування до кінця 2026 — 4 місяці.",
+   mode:"floors",minPct:20,terms:[{max:4,add:50}],views:["Видова","Невидова"],
+   floors:[{label:"2 поверх",prices:[1350,1350]},{label:"3-7 поверх",prices:[1450,1450]},
+           {label:"8-10 поверх",prices:[1650,1450]},{label:"11-13 поверх",prices:[1750,1550]},
+           {label:"14-15 поверх",prices:[1850,1650]},{label:"Пентхаус",prices:[3500,3500]}]},
+  {id:"hpdl5",name:"HYDROPARK DELUXE 5",note:"Здано. Ціна 1680 — 1К на 12-13 поверхах. Інші — вписати вручну.",
+   mode:"floors",minPct:20,terms:[],views:["Видова"],
+   floors:[{label:"12-13 поверх, 1К",prices:[1680]}]},
+  {id:"manufaktura",name:"МІСТЕЧКО МАНУФАКТУРА",note:"Розтермінування — індивідуальні погодження.",
+   mode:"rooms",minPct:20,terms:[],rooms:[{name:"Всі квартири",price:850},{name:"2К, 10 поверх",price:900}]},
+  {id:"lystopad",name:"LYSTOPAD",note:"Розтермінування — індивідуальні погодження.",
+   mode:"rooms",minPct:20,terms:[],rooms:[{name:"Всі квартири",price:1100}]}
+ ]};}
+
+let cfg=defaults();
+const st={pid:"urbn37",room:1,floor:0,view:0,disc:1,firstTouched:false};
+
+/* ---------- утиліти ---------- */
+const $=id=>document.getElementById(id);
+const n=v=>{const x=parseFloat(String(v).replace(",","."));return isFinite(x)?x:0;};
+const up=x=>Math.ceil(x-1e-9);
+const r2=x=>Math.round(x*100)/100;
+const fmt=x=>(isFinite(x)?Math.round(x*100)/100:0).toLocaleString("uk-UA",{maximumFractionDigits:2}).replace(/\u00a0/g," ");
+const usd=x=>fmt(x)+" $";
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("on");setTimeout(()=>t.classList.remove("on"),1900);}
+const prod=()=>cfg.products.find(p=>p.id===st.pid)||cfg.products[0];
+const maxMonths=p=>p.terms.length?Math.max(...p.terms.map(t=>n(t.max))):0;
+function surcharge(p,m){ if(m<=0)return 0;
+  const t=p.terms.slice().sort((a,b)=>n(a.max)-n(b.max)).find(t=>m<=n(t.max));
+  return t?n(t.add):(p.terms.length?n(p.terms[p.terms.length-1].add):0);
+}
+function basePrice(){
+  if($("i-manual").checked) return n($("i-price").value);
+  const p=prod();
+  if(p.mode==="rooms"){const r=p.rooms[st.room]||p.rooms[0];return r?n(r.price):0;}
+  const f=p.floors[st.floor]||p.floors[0];return f?n(f.prices[st.view]||f.prices[0]):0;
+}
+function unitName(){
+  const p=prod();
+  if(p.mode==="rooms"){const r=p.rooms[st.room];return r?r.name:"—";}
+  const f=p.floors[st.floor],v=p.views[st.view];
+  return (f?f.label:"—")+(p.views.length>1&&v?", "+v.toLowerCase():"");
+}
+
+/* ---------- РОЗРАХУНОК (за формулою забудовника) ---------- */
+function calc(){
+  const p=prod(); if(!p) return null;
+  const area=n($("i-area").value);
+  let months=Math.round(n($("i-months").value));
+  months=Math.max(0,Math.min(months,maxMonths(p)));
+  const d=cfg.discounts[st.disc]||cfg.discounts[0];
+  const pct=n(d.pct)/100;
+
+  const base=basePrice();
+  const add=surcharge(p,months);
+  const listInst=base+add;                                   // ціна з надбавкою, без знижки
+  const pDisc=Math.round(base*(1-pct));                       // ціна за м² зі знижкою
+  const pInst=d.onInst?Math.round(listInst*(1-pct)):listInst; // ціна залишкових метрів
+
+  const minFirst=up(area*pDisc*n(p.minPct)/100);
+
+  if(months<=0){                                              // 100% оплата
+    const total=r2(pDisc*area);
+    return{p,area,months,base,add,listInst,pDisc,pInst,d,minFirst,
+      first:total,m2paid:area,m2rest:0,instTotal:0,avg:pDisc,total,
+      rest:0,monthly:0,benefit:r2(area*base-total),full:true};
+  }
+  let first=n($("i-first").value); if(!st.firstTouched||first<=0) first=minFirst;
+  first=Math.min(first,r2(pDisc*area));
+  const m2paid=r2(first/pDisc);
+  const m2rest=r2(area-m2paid);
+  const instTotal=r2(m2rest*pInst);
+  const avg=up((first+instTotal)/area);
+  const total=r2(avg*area);
+  const rest=r2(total-first);
+  return{p,area,months,base,add,listInst,pDisc,pInst,d,minFirst,first,m2paid,m2rest,instTotal,
+    avg,total,rest,monthly:rest/months,benefit:r2(area*listInst-total),full:false};
+}
+
+/* ---------- рендер форми ---------- */
+function renderForm(){
+  $("i-prod").innerHTML=cfg.products.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("");
+  $("i-prod").value=st.pid;
+  const p=prod(); $("prod-hint").textContent=p.note||"";
+
+  const rooms=p.mode==="rooms";
+  $("wrap-rooms").hidden=!rooms; $("wrap-floor").hidden=rooms;
+  $("wrap-view").hidden=rooms||!(p.views&&p.views.length>1);
+
+  if(rooms){
+    if(st.room>=p.rooms.length)st.room=0;
+    $("i-rooms").innerHTML=p.rooms.map((r,i)=>`<option value="${i}">${esc(r.name)} · ${n(r.price)} $/м²</option>`).join("");
+    $("i-rooms").value=st.room;
+  }else{
+    if(st.floor>=p.floors.length)st.floor=0;
+    if(st.view>=p.views.length)st.view=0;
+    $("i-floor").innerHTML=p.floors.map((f,i)=>`<option value="${i}">${esc(f.label)} · ${n(f.prices[st.view]||f.prices[0])} $/м²</option>`).join("");
+    $("i-floor").value=st.floor;
+    $("i-view").innerHTML=p.views.map((v,i)=>`<option value="${i}">${esc(v)}</option>`).join("");
+    $("i-view").value=st.view;
+  }
+  if(!$("i-manual").checked) $("i-price").value=basePrice();
+
+  $("i-disc").innerHTML=cfg.discounts.map((d,i)=>`<option value="${i}">${esc(d.name)}</option>`).join("");
+  if(st.disc>=cfg.discounts.length)st.disc=0;
+  $("i-disc").value=st.disc;
+  const d=cfg.discounts[st.disc];
+  $("d-hint").textContent=n(d.pct)===0?"":(d.onInst
+    ?"Знижка діє і на перший внесок, і на ціну з надбавкою за розтермінування."
+    :"Знижка діє на внесені кошти — тобто на ціну м², за якою зараховується перший внесок.");
+
+  const mx=maxMonths(p);
+  $("i-months").max=mx;
+  if(n($("i-months").value)>mx) $("i-months").value=mx;
+  const opts=[0].concat(p.terms.map(t=>n(t.max)));
+  $("m-chips").innerHTML=opts.map(m=>`<button class="chip" type="button" data-m="${m}">${m===0?"100% оплата":m+" міс"}</button>`).join("");
+  $("m-hint").textContent=p.terms.length
+    ?"Надбавка: "+p.terms.map(t=>`до ${n(t.max)} міс +${n(t.add)}$/м²`).join(", ")+`. Максимум ${mx} міс.`
+    :"По цьому об'єкту розтермінування немає — тільки 100% оплата.";
+}
+
+function renderResult(){
+  const r=calc(); if(!r)return;
+  const rate=n($("i-rate").value);
+  const uah=x=>rate>0?fmt(x*rate)+" ₴":"";
+
+  $("r-obj").textContent=`${r.p.name} · ${r.area} м²`;
+  $("r-sub").textContent=unitName()+(r.full?" · 100% оплата":` · розтермінування ${r.months} міс`);
+
+  const rows=[];
+  rows.push(["sec","Ціна за м²",""]);
+  rows.push(["","Базова ціна",usd(r.base)]);
+  if(!r.full&&r.add) rows.push(["",`Надбавка за ${r.months} міс`,"+ "+usd(r.add)]);
+  if(n(r.d.pct)>0) rows.push(["neg",`Знижка ${n(r.d.pct)}%`,"− "+n(r.d.pct)+"%"]);
+  rows.push(["","Ціна м² зі знижкою (перший внесок)",usd(r.pDisc)]);
+  if(!r.full) rows.push(["","Ціна м² у розтермінування",usd(r.pInst)]);
+  if(!r.full){
+    rows.push(["sec","Розподіл площі",""]);
+    rows.push(["","Оплачено першим внеском",fmt(r.m2paid)+" м²"]);
+    rows.push(["","Залишок у розтермінування",fmt(r.m2rest)+" м²"]);
+    rows.push(["","Сума за залишкові метри",usd(r.instTotal)]);
+    rows.push(["sum","Середня ціна за м²",usd(r.avg)]);
+  }
+  $("r-bd").innerHTML=rows.map(([cls,l,v])=>
+    cls==="sec"?`<tr><td class="sec eyebrow" colspan="2">${esc(l)}</td></tr>`
+    :`<tr class="${cls==="sum"?"sum":""}"><td>${esc(l)}</td><td class="${cls==="neg"?"neg":""}">${esc(v)}</td></tr>`
+  ).join("");
+
+  $("r-first").textContent=usd(r.first); $("r-first-uah").textContent=uah(r.first);
+  $("r-month").textContent=r.full?"—":usd(r.monthly); $("r-month-uah").textContent=r.full?"":uah(r.monthly);
+  $("r-rest").textContent=usd(r.rest);
+  $("r-total").textContent=usd(r.total);
+  $("r-total-uah").textContent=uah(r.total);
+
+  const ben=$("r-benefit"); ben.hidden=!(r.benefit>0.5);
+  $("r-ben").textContent=usd(r.benefit);
+
+  const tl=$("r-tl");
+  if(!r.full&&r.rest>0){
+    tl.hidden=false;
+    const share=Math.max(14,Math.min(78,r.first/r.total*100));
+    $("tl-a").style.flex=`0 0 ${share}%`;
+    $("tl-a").textContent=Math.round(r.first/r.total*100)+"%";
+    $("tl-b").style.setProperty("--m",r.months);
+    $("tl-b").textContent=`${r.months} × ${usd(r.monthly)}`;
+    $("tl-r").textContent="+"+r.months+" міс";
+  }else tl.hidden=true;
+
+  if(document.activeElement!==$("i-first")) $("i-first").value=Math.round(r.first);
+  $("i-first").disabled=r.full;
+  $("f-chips").innerHTML=r.full?"":
+    `<button class="chip" type="button" data-p="min">Мінімум ${usd(r.minFirst)}</button>`+
+    [30,50,70].map(p=>`<button class="chip" type="button" data-p="${p}">${p}%</button>`).join("")+
+    `<button class="chip" type="button" data-p="dog">20% від договору</button>`;
+  $("f-hint").textContent=r.full?"":
+    `${fmt(r.first/(r.pDisc*r.area)*100)}% від ціни при 100% оплаті · `+
+    `${fmt(r.first/r.total*100)}% від вартості договору`;
+  const low=!r.full&&r.first<r.minFirst-0.5;
+  $("f-warn").hidden=!low;
+  $("f-warn").textContent=low?`Мінімальний внесок по цьому об'єкту — ${n(r.p.minPct)}%, тобто ${usd(r.minFirst)}.`:"";
+  document.querySelectorAll("#m-chips .chip").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.m===r.months)));
+  buildPrint(r,rate);
+}
+
+function buildPrint(r,rate){
+  const uah=x=>rate>0?fmt(x*rate)+" ₴":"";
+  const L=[];
+  L.push(`<tr><td>Ім'я</td><td>${esc($("i-client").value||"—")}</td></tr>`);
+  L.push(`<tr><td>Житловий комплекс</td><td>${esc(r.p.name)}</td></tr>`);
+  L.push(`<tr><td>Квартира</td><td>${esc(unitName())}</td></tr>`);
+  L.push(`<tr><td>Площа, м²</td><td>${fmt(r.area)}</td></tr>`);
+  L.push(`<tr><td>Вартість 1 м² (при 100% опл.)</td><td>${usd(r.pDisc)}</td></tr>`);
+  if(!r.full){
+    L.push(`<tr><td>Вартість 1 м² (з розтермінуванням)</td><td>${usd(r.pInst)}</td></tr>`);
+    L.push(`<tr><td>Вартість квартири без знижки</td><td>${usd(r.area*r.listInst)}</td></tr>`);
+    L.push(`<tr><td>Перший внесок</td><td>${usd(r.first)} / ${uah(r.first)}</td></tr>`);
+    L.push(`<tr><td>Вартість 1 м² зі знижкою</td><td>${usd(r.avg)}</td></tr>`);
+    L.push(`<tr class="hi"><td>Вартість квартири зі знижкою</td><td>${usd(r.total)}</td></tr>`);
+    L.push(`<tr><td>Вигода</td><td>${usd(r.benefit)}</td></tr>`);
+    L.push(`<tr><td>Сума на розтермінування</td><td>${usd(r.rest)}</td></tr>`);
+    L.push(`<tr><td>Термін розтермінування, місяців</td><td>${r.months}</td></tr>`);
+    L.push(`<tr class="hi"><td>Щомісячний платіж</td><td>${usd(r.monthly)} / ${uah(r.monthly)}</td></tr>`);
+  }else{
+    L.push(`<tr class="hi"><td>Вартість квартири при 100% опл.</td><td>${usd(r.total)}</td></tr>`);
+    L.push(`<tr><td>У гривні по курсу ${fmt(rate)}</td><td>${uah(r.total)}</td></tr>`);
+  }
+  $("printsheet").innerHTML=`<h2>Розрахунок вартості квартири</h2><table>${L.join("")}</table>
+   <div class="foot">Курс продажу $ в АБ УКРГАЗБАНК: ${fmt(rate)} ₴<br>
+   Валютний договір, оплата національною валютою по курсу продажу в АБ УКРГАЗБАНК на день оплати чергового платежу.<br>
+   Пропозиція дійсна станом на: ${new Date().toLocaleDateString("uk-UA")}</div>`;
+}
+
+/* ---------- налаштування ---------- */
+function renderSet(){
+  $("d-rows").innerHTML=cfg.discounts.map((d,i)=>`<tr data-di="${i}">
+    <td><input value="${esc(d.name)}" data-k="name" style="font-family:'IBM Plex Sans',sans-serif"></td>
+    <td style="width:80px"><input type="number" step="0.5" value="${n(d.pct)}" data-k="pct"></td>
+    <td style="width:60px;text-align:center"><input type="checkbox" ${d.onInst?"checked":""} data-k="onInst" style="width:auto"></td>
+    <td><button class="x" data-act="del-d">×</button></td></tr>`).join("");
+
+  $("px-list").innerHTML=cfg.products.map((p,pi)=>`
+   <section class="card px" data-pi="${pi}">
+    <div class="px-head"><input value="${esc(p.name)}" data-k="name" aria-label="Назва"></div>
+    <div class="step-body">
+      <label class="f"><span class="eyebrow">Примітка</span><input value="${esc(p.note||"")}" data-k="note" style="font-family:'IBM Plex Sans',sans-serif"></label>
+      <div class="row two" style="margin-top:12px">
+        <label class="f"><span class="eyebrow">Мінімальний внесок, %</span><input type="number" step="1" value="${n(p.minPct)}" data-k="minPct"></label>
+      </div>
+      <div class="sub"><h4>Розтермінування</h4>
+        <table class="mini"><thead><tr><th>До скількох місяців</th><th>Надбавка $/м²</th><th></th></tr></thead><tbody>
+        ${p.terms.map((t,i)=>`<tr data-list="terms" data-i="${i}">
+          <td><input type="number" value="${n(t.max)}" data-k="max"></td>
+          <td><input type="number" value="${n(t.add)}" data-k="add"></td>
+          <td><button class="x" data-act="del-row">×</button></td></tr>`).join("")}
+        </tbody></table><button class="add" data-act="add" data-list="terms">+ Строк</button>
+      </div>
+      <div class="sub"><h4>${p.mode==="rooms"?"Ціни за кімнатністю":"Ціни за поверхами"}</h4>
+      ${p.mode==="rooms"?`
+        <table class="mini"><thead><tr><th>Тип</th><th>$/м²</th><th></th></tr></thead><tbody>
+        ${p.rooms.map((r,i)=>`<tr data-list="rooms" data-i="${i}">
+          <td><input value="${esc(r.name)}" data-k="name" style="font-family:'IBM Plex Sans',sans-serif"></td>
+          <td><input type="number" value="${n(r.price)}" data-k="price"></td>
+          <td><button class="x" data-act="del-row">×</button></td></tr>`).join("")}
+        </tbody></table><button class="add" data-act="add" data-list="rooms">+ Тип</button>`
+      :`
+        <table class="mini"><thead><tr><th>Поверх</th>${p.views.map(v=>`<th>${esc(v)}, $/м²</th>`).join("")}<th></th></tr></thead><tbody>
+        ${p.floors.map((f,i)=>`<tr data-list="floors" data-i="${i}">
+          <td><input value="${esc(f.label)}" data-k="label" style="font-family:'IBM Plex Sans',sans-serif"></td>
+          ${p.views.map((v,vi)=>`<td><input type="number" value="${n(f.prices[vi])}" data-k="p${vi}"></td>`).join("")}
+          <td><button class="x" data-act="del-row">×</button></td></tr>`).join("")}
+        </tbody></table><button class="add" data-act="add" data-list="floors">+ Поверх</button>`}
+      </div>
+    </div></section>`).join("");
+}
+const save=()=>store.set(cfg);
+
+/* ---------- події ---------- */
+$("i-prod").onchange=e=>{st.pid=e.target.value;st.room=0;st.floor=0;st.view=0;st.firstTouched=false;
+  $("i-manual").checked=false;$("i-price").disabled=true;renderForm();renderResult();};
+$("i-rooms").onchange=e=>{st.room=+e.target.value;st.firstTouched=false;renderForm();renderResult();};
+$("i-floor").onchange=e=>{st.floor=+e.target.value;st.firstTouched=false;renderForm();renderResult();};
+$("i-view").onchange=e=>{st.view=+e.target.value;st.firstTouched=false;renderForm();renderResult();};
+$("i-disc").onchange=e=>{st.disc=+e.target.value;st.firstTouched=false;renderForm();renderResult();};
+$("i-manual").onchange=e=>{$("i-price").disabled=!e.target.checked;if(!e.target.checked)renderForm();renderResult();};
+["i-area","i-months","i-price","i-rate","i-client"].forEach(id=>$(id).addEventListener("input",renderResult));
+$("i-first").addEventListener("input",()=>{st.firstTouched=true;renderResult();});
+$("m-chips").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;
+  $("i-months").value=b.dataset.m;st.firstTouched=false;renderResult();};
+$("f-chips").onclick=e=>{const b=e.target.closest(".chip");if(!b)return;
+  const r=calc();if(!r)return;
+  if(b.dataset.p==="min"){$("i-first").value=r.minFirst;}
+  else if(b.dataset.p==="dog"){
+    const k=n(r.p.minPct)/100;
+    let f=k*r.area*r.pInst/(1-k+k*r.pInst/r.pDisc);
+    for(let i=0;i<6;i++){                       // уточнюємо з урахуванням округлення вгору
+      const rest=r2(r.area-r2(f/r.pDisc))*r.pInst;
+      const tot=up((f+rest)/r.area)*r.area;
+      f=k*tot;
+    }
+    $("i-first").value=up(f);
+  }
+  else{$("i-first").value=up(r.area*r.pDisc*n(b.dataset.p)/100);}
+  st.firstTouched=true;renderResult();};
+
+function tab(c){$("tab-calc").setAttribute("aria-selected",c);$("tab-set").setAttribute("aria-selected",!c);
+  $("panel-calc").hidden=!c;$("panel-set").hidden=c;
+  if(c){renderForm();renderResult();}else renderSet();}
+$("tab-calc").onclick=()=>tab(true); $("tab-set").onclick=()=>tab(false);
+
+$("d-rows").addEventListener("input",e=>{const i=e.target.closest("tr");if(!i)return;
+  const d=cfg.discounts[+i.dataset.di],k=e.target.dataset.k;
+  d[k]=k==="onInst"?e.target.checked:(k==="pct"?n(e.target.value):e.target.value);save();});
+$("d-rows").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  cfg.discounts.splice(+b.closest("tr").dataset.di,1);save();renderSet();});
+$("d-add").onclick=()=>{cfg.discounts.push({name:"Нова знижка",pct:0,onInst:false});save();renderSet();};
+
+$("px-list").addEventListener("input",e=>{const inp=e.target;if(inp.tagName!=="INPUT")return;
+  const p=cfg.products[+inp.closest(".px").dataset.pi],row=inp.closest("tr"),k=inp.dataset.k;
+  if(row){const it=p[row.dataset.list][+row.dataset.i];
+    if(k&&k[0]==="p"&&k.length===2) it.prices[+k[1]]=n(inp.value);
+    else it[k]=(k==="name"||k==="label")?inp.value:n(inp.value);
+  }else p[k]=(k==="name"||k==="note")?inp.value:n(inp.value);
+  save();});
+$("px-list").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  const p=cfg.products[+b.closest(".px").dataset.pi];
+  if(b.dataset.act==="del-row"){const row=b.closest("tr");p[row.dataset.list].splice(+row.dataset.i,1);}
+  if(b.dataset.act==="add"){const l=b.dataset.list;
+    if(l==="terms")p.terms.push({max:12,add:0});
+    else if(l==="rooms")p.rooms.push({name:"Новий тип",price:1000});
+    else p.floors.push({label:"Новий поверх",prices:p.views.map(()=>1000)});}
+  save();renderSet();});
+
+$("b-exp").onclick=()=>{const b=new Blob([JSON.stringify(cfg,null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="prays.json";a.click();URL.revokeObjectURL(a.href);};
+$("b-imp").onclick=()=>$("fileinp").click();
+$("fileinp").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;
+  const rd=new FileReader();rd.onload=()=>{try{const o=JSON.parse(rd.result);
+    if(!o.products||!Array.isArray(o.products))throw 0;
+    cfg=o;st.pid=cfg.products[0].id;save();renderSet();toast("Прайс завантажено");
+  }catch(err){toast("Файл не підходить — потрібен JSON з цього ж додатка");}};
+  rd.readAsText(f);e.target.value="";});
+$("b-reset").onclick=()=>{if(confirm("Повернути ціни з прайсу 01.07.2026? Ваші зміни зникнуть."))
+  {cfg=defaults();st.pid="urbn37";save();renderSet();toast("Скинуто");}};
+
+$("b-copy").onclick=async()=>{const r=calc();if(!r)return;
+  const rate=n($("i-rate").value);
+  const L=[`${r.p.name} — ${fmt(r.area)} м², ${unitName()}`,
+    `Ціна за м²: ${usd(r.full?r.pDisc:r.avg)}`];
+  if(!r.full){
+    L.push(`Перший внесок: ${usd(r.first)}`,
+      `Розтермінування: ${r.months} міс × ${usd(r.monthly)}`,
+      `Загальна вартість: ${usd(r.total)}`);
+    if(r.benefit>0.5)L.push(`Вигода: ${usd(r.benefit)}`);
+  }else L.push(`Вартість при 100% оплаті: ${usd(r.total)}`);
+  if(rate>0)L.push(`Курс $ (Укргазбанк): ${fmt(rate)} ₴`);
+  const t=L.join("\n");
+  try{await navigator.clipboard.writeText(t);toast("Скопійовано");}catch(e){prompt("Скопіюйте:",t);}};
+$("b-print").onclick=()=>window.print();
+
+/* ---------- картинка для месенджера ---------- */
+let imgBlob=null;
+async function makeImage(){
+  const r=calc(); if(!r) return null;
+  const rate=n($("i-rate").value), client=$("i-client").value.trim();
+  try{ await document.fonts.ready; }catch(e){}
+
+  const W=900,S=2, PAD=40;
+  const headH=client?168:140;
+  let H=headH+24;
+  H+=42*2;                        // площа + ціна за м²
+  if(!r.full) H+=96;              // блок внеску та платежу
+  H+=86;                          // вартість
+  if(r.benefit>0.5) H+=58;
+  H+=104;                         // підвал
+
+  const cv=document.createElement("canvas");
+  cv.width=W*S; cv.height=H*S;
+  const c=cv.getContext("2d"); c.scale(S,S);
+  const F=(w,sz,fam)=>`${w} ${sz}px ${fam||'"IBM Plex Sans", sans-serif'}`;
+  const MONO='"IBM Plex Mono", monospace', COND='"IBM Plex Sans Condensed", sans-serif';
+  const right=(t,x,y)=>{c.textAlign="right";c.fillText(t,x,y);c.textAlign="left";};
+
+  c.fillStyle="#fff"; c.fillRect(0,0,W,H);
+  c.fillStyle="#0e1a29"; c.fillRect(0,0,W,headH);
+  try{c.letterSpacing="2px";}catch(e){}
+  c.fillStyle="#8fa8bd"; c.font=F(500,13,MONO);
+  c.fillText("РОЗРАХУНОК ВАРТОСТІ КВАРТИРИ",PAD,52);
+  try{c.letterSpacing="0px";}catch(e){}
+  c.fillStyle="#fff"; c.font=F(700,34,COND);
+  c.fillText(r.p.name.toUpperCase(),PAD,94);
+  c.fillStyle="#9db2c6"; c.font=F(400,16,MONO);
+  c.fillText(`${fmt(r.area)} м² · ${unitName()}`,PAD,120);
+  if(client){ c.fillStyle="#fff"; c.font=F(500,17); c.fillText(client,PAD,150); }
+
+  let y=headH+46;
+  const row=(l,v,strong)=>{
+    c.fillStyle="#3c4f63"; c.font=F(400,17); c.fillText(l,PAD,y);
+    c.fillStyle=strong?"#0e1a29":"#0e1a29"; c.font=F(strong?600:500,18,MONO);
+    right(v,W-PAD,y);
+    c.strokeStyle="#e4e9ee"; c.lineWidth=1;
+    c.beginPath(); c.moveTo(PAD,y+14); c.lineTo(W-PAD,y+14); c.stroke();
+    y+=42;
+  };
+  row("Площа",fmt(r.area)+" м²");
+  row(r.full?"Ціна за м² при 100% оплаті":"Ціна за м² зі знижкою",usd(r.full?r.pDisc:r.avg));
+
+  if(!r.full){
+    const bw=(W-PAD*2-14)/2;
+    c.fillStyle="#e3f0f1"; c.strokeStyle="#b3d6da";
+    [0,1].forEach(i=>{ const x=PAD+i*(bw+14);
+      c.beginPath(); c.roundRect(x,y-4,bw,80,3); c.fill(); c.stroke(); });
+    try{c.letterSpacing="1.6px";}catch(e){}
+    c.fillStyle="#3c4f63"; c.font=F(500,12,MONO);
+    c.fillText("ПЕРШИЙ ВНЕСОК",PAD+16,y+22);
+    c.fillText("ЩОМІСЯЦЯ",PAD+bw+30,y+22);
+    try{c.letterSpacing="0px";}catch(e){}
+    c.fillStyle="#0c6f7d"; c.font=F(600,27,MONO);
+    c.fillText(usd(r.first),PAD+16,y+56);
+    c.fillText(usd(r.monthly),PAD+bw+30,y+56);
+    y+=96;
+    c.fillStyle="#3c4f63"; c.font=F(400,17);
+    c.fillText(`Розтермінування ${r.months} міс`,PAD,y);
+    c.fillStyle="#0e1a29"; c.font=F(500,18,MONO);
+    right(usd(r.rest),W-PAD,y);
+    c.strokeStyle="#e4e9ee"; c.beginPath(); c.moveTo(PAD,y+14); c.lineTo(W-PAD,y+14); c.stroke();
+    y+=42;
+  }
+
+  c.fillStyle="#0e1a29"; c.font=F(600,20,COND);
+  try{c.letterSpacing="1px";}catch(e){}
+  c.fillText("ВАРТІСТЬ КВАРТИРИ",PAD,y+16);
+  try{c.letterSpacing="0px";}catch(e){}
+  c.font=F(600,34,MONO); right(usd(r.total),W-PAD,y+20);
+  y+=64;
+
+  if(r.benefit>0.5){
+    c.fillStyle="#fdf6e4"; c.strokeStyle="#e2cf9c";
+    c.beginPath(); c.roundRect(PAD,y-16,W-PAD*2,46,3); c.fill(); c.stroke();
+    c.fillStyle="#8c6a1f"; c.font=F(500,16);
+    c.fillText("Вигода клієнта",PAD+16,y+13);
+    c.font=F(600,18,MONO); right(usd(r.benefit),W-PAD-16,y+13);
+    y+=58;
+  }
+
+  y+=18;
+  c.fillStyle="#7a8a99"; c.font=F(400,13,MONO);
+  if(rate>0) c.fillText(`Курс продажу $ в АБ УКРГАЗБАНК: ${fmt(rate)} ₴`,PAD,y);
+  c.font=F(400,12.5);
+  c.fillText("Валютний договір, оплата національною валютою по курсу продажу",PAD,y+22);
+  c.fillText("в АБ УКРГАЗБАНК на день оплати чергового платежу.",PAD,y+40);
+  c.fillText(`Пропозиція дійсна станом на ${new Date().toLocaleDateString("uk-UA")}`,PAD,y+62);
+
+  return await new Promise(res=>cv.toBlob(res,"image/png"));
+}
+
+$("b-img").onclick=async()=>{
+  try{
+    imgBlob=await makeImage(); if(!imgBlob){toast("Спочатку заповніть розрахунок");return;}
+    $("im-preview").src=URL.createObjectURL(imgBlob);
+    const f=new File([imgBlob],"rozrahunok.png",{type:"image/png"});
+    $("im-share").hidden=!(navigator.canShare&&navigator.canShare({files:[f]}));
+    $("imgmodal").hidden=false;
+  }catch(e){ toast("Не вдалося створити картинку"); }
+};
+$("im-close").onclick=()=>{$("imgmodal").hidden=true;};
+$("imgmodal").addEventListener("click",e=>{ if(e.target.id==="imgmodal") $("imgmodal").hidden=true; });
+$("im-share").onclick=async()=>{
+  const f=new File([imgBlob],"rozrahunok.png",{type:"image/png"});
+  try{ await navigator.share({files:[f]}); }catch(e){}
+};
+$("im-copy").onclick=async()=>{
+  try{ await navigator.clipboard.write([new ClipboardItem({"image/png":imgBlob})]); toast("Картинку скопійовано"); }
+  catch(e){ toast("Браузер не дозволяє копіювати — збережіть файл"); }
+};
+$("im-save").onclick=()=>{
+  const a=document.createElement("a"); a.href=URL.createObjectURL(imgBlob);
+  a.download="rozrahunok.png"; a.click(); URL.revokeObjectURL(a.href);
+};
+
+(async function(){
+  const s=await store.get();
+  const fresh=defaults();
+  if(s&&Array.isArray(s.products)&&s.products.length){
+    cfg=s;
+    if(s.version!==fresh.version&&s.dismissed!==fresh.version){
+      $("banner-txt").textContent=`Доступний новіший прайс (${fresh.version}). У вас збережений від ${s.version||"невідомої дати"}.`;
+      $("banner").hidden=false;
+      $("b-upd").onclick=()=>{cfg=fresh;st.pid=cfg.products[0].id;save();$("banner").hidden=true;renderForm();renderResult();toast("Ціни оновлено");};
+      $("b-later").onclick=()=>{cfg.dismissed=fresh.version;save();$("banner").hidden=true;};
+    }
+  }
+  if(!cfg.products.some(p=>p.id===st.pid))st.pid=cfg.products[0].id;
+  renderForm();renderResult();
+})();
+</script>
+</body>
+</html>

@@ -921,8 +921,24 @@ async function makeImage(){
   const W=900,S=2, PAD=40;
   const logoH=logo?54:0;
   const headH=(client?168:140)+logoH;
+  const pr=[["Площа",fmt(r.area)+" м²",false]];
+  if(r.full){
+    pr.push(["Базова ціна за м²",usd(r.base),false]);
+    if(n(r.d.pct)>0) pr.push([`Знижка ${n(r.d.pct)}%`,"− "+n(r.d.pct)+"%",false]);
+    pr.push(["Ціна за м² при 100% оплаті",usd(r.pDisc),true]);
+  }else if(r.simple){
+    pr.push(["Базова ціна за м²",usd(r.base),false]);
+    if(r.add) pr.push([`Надбавка за ${r.months} міс`,"+ "+usd(r.add),false]);
+    if(n(r.d.pct)>0) pr.push([`Знижка ${n(r.d.pct)}%`,"− "+n(r.d.pct)+"%",false]);
+    pr.push(["Ціна за м² зі знижкою",usd(r.pDisc),true]);
+  }else{
+    pr.push(["Базова ціна за м²",usd(r.base),false]);
+    pr.push(["Ціна за м² при 100% оплаті",usd(r.pDisc),false]);
+    pr.push([`Ціна за м² у розтермінування ${r.months} міс`,usd(r.pInst),false]);
+    pr.push(["Середня ціна за м² у цьому розрахунку",usd(r.avg),true]);
+  }
   let H=headH+24;
-  H+=42*2;                        // площа + ціна за м²
+  H+=42*pr.length;
   if(!r.full) H+=96;              // блок внеску та платежу
   H+=86;                          // вартість
   if(r.benefit>0.5) H+=58;
@@ -957,15 +973,15 @@ async function makeImage(){
 
   let y=headH+46;
   const row=(l,v,strong)=>{
-    c.fillStyle="#3c4f63"; c.font=F(400,17); c.fillText(l,PAD,y);
+    if(strong){c.fillStyle=tint(GOLD,.93);c.fillRect(PAD-10,y-22,W-PAD*2+20,36);}
+    c.fillStyle=strong?INK:"#3c4f63"; c.font=F(strong?600:400,17); c.fillText(l,PAD,y);
     c.fillStyle=INK; c.font=F(strong?600:500,18,MONO);
     right(v,W-PAD,y);
     c.strokeStyle="#e4e9ee"; c.lineWidth=1;
     c.beginPath(); c.moveTo(PAD,y+14); c.lineTo(W-PAD,y+14); c.stroke();
     y+=42;
   };
-  row("Площа",fmt(r.area)+" м²");
-  row(r.full?"Ціна за м² при 100% оплаті":"Ціна за м² зі знижкою",usd(r.full?r.pDisc:r.avg));
+  pr.forEach(([l,v,strong])=>row(l,v,strong));
 
   if(!r.full){
     const bw=(W-PAD*2-14)/2;

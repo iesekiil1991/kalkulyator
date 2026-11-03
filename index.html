@@ -508,7 +508,7 @@ const store={
 
 /* ---------- ДАНІ З ПРАЙСУ 01.11.2026 ---------- */
 function defaults(){return{
- version:"2026-11-01 прайс, ред.6",
+ version:"2026-11-03 прайс 01.11, ред.7",
  roundUpAvg:true,
  brand:{name:"VERTICAL DEVELOPMENT",ink:"#01283B",accent:"#0A4C6B",gold:"#FFAF11",logoLight:false,pin:"2610",bg:"brand",bgImg:null,logo:LOGO,phone:"",manager:""},
  discounts:[
@@ -521,14 +521,14 @@ function defaults(){return{
  ],
  products:[
   {id:"urbn12",handover:"I квартал 2027",photo:"urbn",name:"URBN 1-2",note:"Здача QI 2027. Розтермінування до 12 місяців, ціна за м² +50 $.",
-   mode:"rooms",minPct:30,terms:[{max:12,add:50}],
+   mode:"rooms",minPct:20,terms:[{max:12,add:50}],
    rooms:[{name:"1К",price:1050,areas:[35.05,35.27,35.73,40.1,41.96,42.79],stock:{"35.05":1,"35.27":1,"35.73":1,"40.1":2,"41.96":2,"42.79":2}},{name:"2К",price:1030,areas:[59.7,60.98,61.91,62.47,64.49,67.21],stock:{"59.7":2,"60.98":5,"61.91":4,"62.47":6,"64.49":4,"67.21":1}},{name:"3К",price:990,areas:[],stock:{}}]},
   {id:"urbn37",handover:"I квартал 2028",photo:"urbn",name:"URBN 3-7",note:"Здача QI 2028. Внесок від 20%.",
    mode:"rooms",minPct:20,terms:[{max:12,add:30},{max:24,add:60},{max:25,add:75}],
    rooms:[{name:"Студія",price:1030,areas:[30.9,32.6,32.68,32.9,33.6,33.82,38.19,38.3,38.9,46.1],stock:{"30.9":1,"32.6":7,"32.68":4,"32.9":9,"33.6":10,"33.82":4,"38.19":2,"38.3":8,"38.9":9,"46.1":5}},{name:"1К",price:1050,areas:[40.37,40.7,41.6,43.3,44.4,44.8,44.9,45.7,45.8,45.81,45.87],stock:{"40.37":1,"40.7":1,"41.6":1,"43.3":1,"44.4":10,"44.8":4,"44.9":1,"45.7":1,"45.8":2,"45.81":4,"45.87":3}},
           {name:"2К (до 69,9 м²)",price:1020,areas:[65.5,67.3,69.9],stock:{"65.5":2,"67.3":1,"69.9":1}},{name:"3К (від 71 м²)",price:995,areas:[71.0,72.6,72.7,72.8,73.71,74.5,77.9,78.3,78.46],stock:{"71.0":3,"72.6":10,"72.7":6,"72.8":3,"73.71":4,"74.5":3,"77.9":10,"78.3":8,"78.46":4}}]},
   {id:"pf15",handover:"I квартал 2027",photo:"pf",name:"PORTO FRANKO 1-5",note:"Розтермінування 12 місяців, ціна за м² +50 $. Машиномісце $945 при 100% оплаті.",
-   mode:"rooms",minPct:30,terms:[{max:12,add:50}],
+   mode:"rooms",minPct:20,terms:[{max:12,add:50}],
    rooms:[{name:"1К",price:1260,areas:[39.1,49.48],stock:{"39.1":2,"49.48":1}},{name:"2К (до 80 м²)",price:1210,areas:[55.8,61.2,64.83,65.29,69.3,70.76],stock:{"55.8":1,"61.2":1,"64.83":3,"65.29":2,"69.3":2,"70.76":1}},{name:"3К (від 80 м²)",price:1115,areas:[81.5],stock:{"81.5":1}}]},
   {id:"pf611",handover:"I квартал 2028",photo:"pf",name:"PORTO FRANKO 6-11",note:"Здача QI 2028. Внесок від 20%. Акція −50 $/м²: 1К 43,1 м² (секція 10), 2К 65,8 м² і 3К 74,5 м² (секція 8) — вкажіть ціну вручну.",
    mode:"rooms",minPct:20,terms:[{max:12,add:30},{max:24,add:60},{max:25,add:75}],
@@ -543,11 +543,11 @@ function defaults(){return{
    floors:[{label:"2 поверх",prices:[1395,1395]},{label:"3-7 поверх",prices:[1480,1480]},
            {label:"8-10 поверх",prices:[1565,1480]},{label:"11-13 поверх",prices:[1730,1480]}]},
   {id:"hpdl3",areas:[74.28,108.33,109.32,110.31,111.16],handover:"I квартал 2027",photo:"hpdl",name:"HYDROPARK DELUXE 3",note:"Здача QI 2027. Розтермінування до 12 місяців, ціна за м² +50 $.",
-   mode:"floors",minPct:30,terms:[{max:12,add:50}],views:["Видова"],
+   mode:"floors",minPct:20,terms:[{max:12,add:50}],views:["Видова"],
    floors:[{label:"2 поверх",prices:[1395]},{label:"3-7 поверх",prices:[1480]},{label:"8-10 поверх",prices:[1625]},
            {label:"11-13 поверх",prices:[1730]},{label:"14-15 поверх",prices:[1835]},{label:"Пентхаус",prices:[3500]}]},
   {id:"hpdl4",areas:[55.99,56.01,66.22,67.04,87.65,88.79,89.02,91.72,92.2,94.72,107.84,193.63],handover:"I квартал 2027",photo:"hpdl",name:"HYDROPARK DELUXE 4",note:"Здача QI 2027. Розтермінування до 12 місяців, ціна за м² +50 $.",
-   mode:"floors",minPct:30,terms:[{max:12,add:50}],views:["Видова","Невидова"],
+   mode:"floors",minPct:20,terms:[{max:12,add:50}],views:["Видова","Невидова"],
    floors:[{label:"2 поверх",prices:[1420,1420]},{label:"3-7 поверх",prices:[1520,1520]},
            {label:"8-10 поверх",prices:[1730,1520]},{label:"11-13 поверх",prices:[1830,1625]},
            {label:"14-15 поверх",prices:[1940,1730]},{label:"Пентхаус",prices:[3500,3500]}]},
